@@ -9,14 +9,13 @@ def run(billy, event):
     if "msg" in event:
         print(event["msg"] + "\n")
     else:
-        billy.send_command(command=event["cmd"], d=event["delay"])
+        # billy.send_command(command=event["cmd"], d=event["delay"])
+        billy.send_command(command=event["cmd"], d=1)
         if "checkpoint" in event:
             print("%s checkpoint is reached!\n" % event["checkpoint"])
 
 
-def execute(billy):
-    # Travel to/from starting checkpoint 0 from/to the charging base
-
+def execute(billy, index: int = 0):
     route = [
         {
             "cmd": "command",
@@ -125,9 +124,10 @@ def execute(billy):
         }
     ]
 
-    for i in range(len(route)):
+    for i in range(index, len(route)):
+        print("index is %d" % i)
         if not billy.get_isInterruptd():
             run(billy, route[i])
         else:
-            print("Interrupted")
+            billy.saveStateIndex(i)
             break

@@ -57,9 +57,7 @@ class Tello:
             now = time.time()
             diff = now - start
             if diff > self.MAX_TIME_OUT:
-                print("Timedout with no response")
-                # I'll sleep here since there's no response from the drone anyways
-                print("sleeping %s" % d)
+                # print("Timedout with no response")
                 time.sleep(d)
                 return
         print('Done!!! sent command: %s to %s' % (command, self.tello_ip))
