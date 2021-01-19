@@ -46,6 +46,13 @@ button_take_over = Button(
 button_continue_sweep = Button(
     frame0, text='Continue sweep', width=10, command=lambda: threading.Thread(target=tello.continue_sweep).start()).grid(row=1, column=2, padx=90, pady=10)
 
+stream_on = Button(
+    frame0, text='Stream ON', width=10, command=lambda: threading.Thread(target=tello.streamon).start()).grid(row=3, column=0, padx=90, pady=10)
+stream_off = Button(
+    frame0, text='Stream OFF', width=10, command=lambda: threading.Thread(target=tello.streamoff).start()).grid(row=3, column=1, padx=90, pady=10)
+print_stats = Button(
+    frame0, text='Print Stats', width=10, command=lambda: threading.Thread(target=tello.printStats).start()).grid(row=3, column=2, padx=90, pady=10)
+
 # buttons to control flying forward, back, left and right
 button_forward = Button(frame1, text='forward', height=1, width=8,
                         command=lambda: tello.send_command('forward '+d)).grid(row=0, column=1)

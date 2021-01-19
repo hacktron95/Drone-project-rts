@@ -125,7 +125,7 @@ def execute(billy, index: int = 0):
     ]
 
     for i in range(index, len(route)):
-        print("index is %d" % i)
+        # print("index is %d" % i)
         if not billy.get_isInterruptd():
             run(billy, route[i])
         else:

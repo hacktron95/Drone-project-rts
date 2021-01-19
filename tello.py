@@ -3,6 +3,7 @@ import threading
 import time
 from stats import Stats
 import sweep
+from cv2 import cv2
 
 
 class Tello:
@@ -25,8 +26,55 @@ class Tello:
 
         self.isInterruptd = False
         self.stateIndex = 0
+        self.stream_state = False
+        self.last_frame = None
         self.MAX_TIME_OUT = 0.1  # fail fast since there's no drone
         self.send_command('command', 0)
+
+    def _video_thread(self):
+        # from https://github.com/Virodroid/easyTello/blob/master/easytello/tello.py
+        # Creating stream capture object
+        # cap = cv2.VideoCapture('udp://'+self.tello_ip+':11111')
+        # Runs while 'stream_state' is True
+        cap = cv2.VideoCapture(0)
+        while self.stream_state:
+            ret, self.last_frame = cap.read()
+            cv2.imshow('DJI Tello', self.last_frame)
+
+            # Video Stream is closed if escape key is pressed
+            k = cv2.waitKey(1) & 0xFF
+            if k == 27:
+                break
+        cap.release()
+        cv2.destroyAllWindows()
+
+    def streamon(self):
+        self.send_command('streamon')
+        self.stream_state = True
+        self.video_thread = threading.Thread(target=self._video_thread)
+        self.video_thread.daemon = True
+        self.video_thread.start()
+
+    def streamoff(self):
+        self.stream_state = False
+        self.send_command('streamoff')
+
+    def printStats(self):
+        self.get_speed()
+        self.get_battery()
+        self.get_time()
+        self.get_height()
+        self.get_temp()
+        self.get_attitude()
+        # get_baro
+        # get_acceleration
+        # get_tof
+        # get_wifi
+
+    # def streamVID(self):
+    #     print("Started Streaming video from drone ....")
+    #     self.send_command('streamon', 0)
+    #     self.isStreamingVideo = True
 
     def Interrupt(self):
         self.isInterruptd = True
@@ -53,7 +101,7 @@ class Tello:
         # continue the sweep
         self.unlockInterrupt()
         sweep.execute(self, self.stateIndex)
-        print("tello continue sweep")
+        print("continue autonomus mode ...")
 
     def send_command(self, command, d: int = 1):
         self.log.append(Stats(command, len(self.log)))
@@ -94,3 +142,46 @@ class Tello:
 
     def get_log(self):
         return self.log
+
+    # Read Commands
+    # Dear Dr Nazean, I copied some code from this file
+    # https://github.com/Virodroid/easyTello/blob/master/easytello/tello.py
+    def get_speed(self):
+        self.send_command('speed?', True)
+        return self.log[-1].get_response()
+
+    def get_battery(self):
+        self.send_command('battery?', True)
+        return self.log[-1].get_response()
+
+    def get_time(self):
+        self.send_command('time?', True)
+        return self.log[-1].get_response()
+
+    def get_height(self):
+        self.send_command('height?', True)
+        return self.log[-1].get_response()
+
+    def get_temp(self):
+        self.send_command('temp?', True)
+        return self.log[-1].get_response()
+
+    def get_attitude(self):
+        self.send_command('attitude?', True)
+        return self.log[-1].get_response()
+
+    def get_baro(self):
+        self.send_command('baro?', True)
+        return self.log[-1].get_response()
+
+    def get_acceleration(self):
+        self.send_command('acceleration?', True)
+        return self.log[-1].get_response()
+
+    def get_tof(self):
+        self.send_command('tof?', True)
+        return self.log[-1].get_response()
+
+    def get_wifi(self):
+        self.send_command('wifi?', True)
+        return self.log[-1].get_response()
