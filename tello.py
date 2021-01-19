@@ -24,11 +24,18 @@ class Tello:
         self.log = []
 
         self.isInterruptd = False
+        self.stateIndex = 0
         self.MAX_TIME_OUT = 0.1  # fail fast since there's no drone
         self.send_command('command', 0)
 
     def Interrupt(self):
         self.isInterruptd = True
+
+    def unlockInterrupt(self):
+        self.isInterruptd = False
+
+    def saveStateIndex(self, index):
+        self.stateIndex = index
 
     def get_isInterruptd(self):
         return self.isInterruptd
@@ -44,6 +51,8 @@ class Tello:
 
     def continue_sweep(self):
         # continue the sweep
+        self.unlockInterrupt()
+        sweep.execute(self, self.stateIndex)
         print("tello continue sweep")
 
     def send_command(self, command, d: int = 1):
