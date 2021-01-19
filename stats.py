@@ -56,15 +56,16 @@ class Stats:
         return temp
 
     def get_response(self):
-        if 'attitude?' in self.command:
-            return self.attitude_response()
-        elif 'acceleration?' in self.command:
-            return self.acceleration_response()
-        elif 'temp?' in self.command:
-            return self.temp_response()
-        elif 'baro?' in self.command or 'speed?' in self.command:
-            return self.float_response(self.response)
-        elif '?' not in self.command:
-            return self.get_raw_response()
-        else:
-            return self.int_response(self.response)
+        return self.get_raw_response()
+        # if 'attitude?' in self.command:
+        #     return self.attitude_response()
+        # elif 'acceleration?' in self.command:
+        #     return self.acceleration_response()
+        # elif 'temp?' in self.command:
+        #     return self.temp_response()
+        # elif 'baro?' in self.command or 'speed?' in self.command:
+        #     return self.float_response(self.response)
+        # elif '?' not in self.command:
+        #     return self.get_raw_response()
+        # else:
+        #     return self.int_response(self.response)

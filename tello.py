@@ -62,11 +62,11 @@ class Tello:
 
     def printStats(self):
         print(self.get_speed())
-        # self.get_battery()
-        # self.get_time()
-        # self.get_height()
-        # self.get_temp()
-        # self.get_attitude()
+        self.get_battery()
+        self.get_time()
+        self.get_height()
+        self.get_temp()
+        self.get_attitude()
         # get_baro
         # get_acceleration
         # get_tof
