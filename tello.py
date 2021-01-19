@@ -10,8 +10,8 @@ class Tello:
     def __init__(self):
         self.local_ip = ''
         self.local_port = 8889
-        self.socket = socket.socket(
-            socket.AF_INET, socket.SOCK_DGRAM)  # socket for sending cmd
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind((self.local_ip, self.local_port))
 
         # thread for receiving cmd ack
@@ -21,14 +21,15 @@ class Tello:
 
         self.tello_ip = '192.168.10.1'
         self.tello_port = 8889
-        self.tello_adderss = (self.tello_ip, self.tello_port)
+        self.tello_address = (self.tello_ip, self.tello_port)
         self.log = []
 
         self.isInterruptd = False
         self.stateIndex = 0
+        self.debug = True
         self.stream_state = False
         self.last_frame = None
-        self.MAX_TIME_OUT = 0.1  # fail fast since there's no drone
+        self.MAX_TIME_OUT = 1  # fail fast since there's no drone
         self.send_command('command', 0)
 
     def _video_thread(self):
@@ -60,12 +61,12 @@ class Tello:
         self.send_command('streamoff')
 
     def printStats(self):
-        self.get_speed()
-        self.get_battery()
-        self.get_time()
-        self.get_height()
-        self.get_temp()
-        self.get_attitude()
+        print(self.get_speed())
+        # self.get_battery()
+        # self.get_time()
+        # self.get_height()
+        # self.get_temp()
+        # self.get_attitude()
         # get_baro
         # get_acceleration
         # get_tof
@@ -103,28 +104,30 @@ class Tello:
         sweep.execute(self, self.stateIndex)
         print("continue autonomus mode ...")
 
-    def send_command(self, command, d: int = 1):
+    def send_command(self, command: str, d: int = 1, query: bool = False):
+
         self.log.append(Stats(command, len(self.log)))
 
-        self.socket.sendto(command.encode('utf-8'), self.tello_adderss)
-        print('sending command: %s to drone' % command)
+        # Sending command to Tello
+        self.socket.sendto(command.encode('utf-8'), self.tello_address)
+        # Displaying conformation message (if 'debug' os True)
+        if self.debug is True:
+            print('Sending command: {}'.format(command))
 
+        # Checking whether the command has timed out or not (based on value in 'MAX_TIME_OUT')
         start = time.time()
+        # Runs while no repsonse has been received in log
         while not self.log[-1].got_response():
             now = time.time()
-            diff = now - start
-            if diff > self.MAX_TIME_OUT:
-                # print("Timedout with no response")
-                time.sleep(d)
-                return
-        print('Done!!! sent command: %s to %s' % (command, self.tello_ip))
+            difference = now - start
+            if difference > self.MAX_TIME_OUT:
+                print('Connection timed out!')
+                break
+        # Prints out Tello response (if 'debug' is True)
+        if self.debug is True and query is False:
+            print('Response: {}'.format(self.log[-1].get_response()))
 
     def _receive_thread(self):
-        """Listen to responses from the Tello.
-
-        Runs as a thread, sets self.response to whatever the Tello last returned.
-
-        """
         while True:
             try:
                 self.response, ip = self.socket.recvfrom(1024)
@@ -144,7 +147,6 @@ class Tello:
         return self.log
 
     # Read Commands
-    # Dear Dr Nazean, I copied some code from this file
     # https://github.com/Virodroid/easyTello/blob/master/easytello/tello.py
     def get_speed(self):
         self.send_command('speed?', True)

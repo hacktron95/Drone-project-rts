@@ -85,14 +85,21 @@ button_flip_r = Button(frame_flip, text='flip right', height=1, width=10,
                        command=lambda: tello.send_command('flip r')).grid(row=1, column=2)
 
 # scrollbar to set the angle to rotate
-angle_change = Scale(frame_scale, from_=1, to=360,
+angle_slider = Scale(frame_scale, from_=1, to=360,
                      orient=HORIZONTAL, tickinterval=60, resolution=1, length=200)
-angle_change.grid(row=0, column=1, padx=95)
+angle_slider.grid(row=0, column=1, padx=95)
+
+
+def angle_change():
+    global a
+    a = str(angle_slider.get())
+    print(f"angel set to {a}")
 
 
 def speed_change():
-    a = str(angle_change.get())
-    print('rotate angle set: ', a)
+    global d
+    d = str(distance_change.get())
+    print(f"distance set to {d}")
 
 
 angle = Button(frame_scale, text='angle confirm', padx=4, command=angle_change)
