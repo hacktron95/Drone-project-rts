@@ -4,54 +4,130 @@ import time
 # billy is the tello object
 
 
+def run(billy, event):
+    # if event has checkpoint, print the message
+    if "msg" in event:
+        print(event["msg"] + "\n")
+    else:
+        billy.send_command(command=event["cmd"], d=event["delay"])
+        if "checkpoint" in event:
+            print("%s checkpoint is reached!\n" % event["checkpoint"])
+
+
 def execute(billy):
     # Travel to/from starting checkpoint 0 from/to the charging base
-    frombase = ["forward", 50, "ccw", 150]
-    tobase = ["ccw", 150, "forward", 50]
 
-    # Flight path to Checkpoint 1 to 5 and back to Checkpoint 0 sequentially
-    checkpoint = [[1, "cw", 90, "forward", 100], [2, "ccw", 90, "forward", 80], [3, "ccw", 90, "forward", 40],
-                  [4, "ccw", 90, "forward", 40], [5, "cw", 90, "forward", 60], [0, "ccw", 90, "forward", 40]]
+    route = [
+        {
+            "cmd": "command",
+            "delay": 0
+        },
+        {
+            "cmd": "takeoff",
+            "delay": 7
+        },
+        {
+            "msg": "From the charging base to the starting checkpoint of sweep pattern."
+        },
+        {
+            "cmd": "forward 50",
+            "delay": 4
+        },
+        {
+            "cmd": "ccw 150",
+            "delay": 4
+        },
+        {
+            "msg": "Current location: Checkpoint 0"
+        },
+        # one sweep starts
+        {
 
-    # Put Tello into command mode
-    billy.send_command("command", 3)
+            "cmd": "cw 90",
+            "delay": 4
+        },
+        {
+            "checkpoint": 1,
+            "cmd": "forward 100",
+            "delay": 4
+        },
+        {
 
-    # # Send_command the takeoff command
-    billy.send_command("takeoff", 7)
+            "cmd": "ccw 90",
+            "delay": 4
+        },
+        {
+            "checkpoint": 2,
+            "cmd": "forward 80",
+            "delay": 4
+        },
+        {
 
-    print("\n")
+            "cmd": "ccw 90",
+            "delay": 4
+        },
+        {
+            "checkpoint": 3,
+            "cmd": "forward 40",
+            "delay": 4
+        },
+        {
 
-    # Start at checkpoint 1 and print destination
-    print("From the charging base to the starting checkpoint of sweep pattern.\n")
+            "cmd": "ccw 90",
+            "delay": 4
+        },
+        {
+            "checkpoint": 4,
+            "cmd": "forward 40",
+            "delay": 4
+        },
+        {
 
-    billy.send_command(frombase[0] + " " + str(frombase[1]), 4)
-    billy.send_command(frombase[2] + " " + str(frombase[3]), 4)
+            "cmd": "cw 90",
+            "delay": 4
+        },
+        {
+            "checkpoint": 5,
+            "cmd": "forward 60",
+            "delay": 4
+        },
+        {
+            "checkpoint": 0,
+            "cmd": "ccw 90",
+            "delay": 4
+        },
+        {
+            "cmd": "forward 40",
+            "delay": 4
+        },
+        # one sweep complete
+        {
+            "msg": "Complete sweep. Return to charging base."
+        },
+        {
+            "cmd": "ccw 150",
+            "delay": 4
+        },
+        {
+            "cmd": "forward 50",
+            "delay": 4
+        },
+        {
+            "msg": "Turn to original direction before land."
+        },
+        {
+            "cmd": "cw 180",
+            "delay": 4
+        },
+        {
+            "cmd": "land",
+            "delay": 4
+        }
+    ]
 
-    # print("Current location: Checkpoint 0 " + "\n")
-
-    # # Billy's flight path
-    # for i in range(len(checkpoint)):
-    #     if i == len(checkpoint)-1:
-    #         print("Returning to Checkpoint 0. \n")
-
-    #     billy.send_command(checkpoint[i][1] + " " + str(checkpoint[i][2]), 4)
-    #     billy.send_command(checkpoint[i][3] + " " + str(checkpoint[i][4]), 4)
-
-    #     print("Arrived at current location: Checkpoint " +
-    #           str(checkpoint[i][0]) + "\n")
-    #     time.sleep(4)
-
-    # # Reach back at Checkpoint 0
-    # print("Complete sweep. Return to charging base.\n")
-    # billy.send_command(tobase[0] + " " + str(tobase[1]), 4)
-    # billy.send_command(tobase[2] + " " + str(tobase[3]), 4)
-
-    # # Turn to original direction before land
-    # print("Turn to original direction before land.\n")
-    # billy.send_command("cw 180", 4)
-
-    # # Land
-    # billy.send_command("land", 3)
-
-    # # Close the socket
-    # billy.sock.close()
+    for i in range(len(route)):
+        if not billy.get_isInterruptd():
+            run(billy, route[i])
+        else:
+            print("Interrupted")
+            break

@@ -1,6 +1,7 @@
 # pyhton3
 from tkinter import *
 from datetime import datetime
+import threading
 import time
 from tello import Tello
 import sys
@@ -39,11 +40,11 @@ button_land = Button(frame0, text='land', width=10, command=lambda: tello.send_c
 
 
 button_follow_auto_sweep = Button(
-    frame0, text='Follow Sweep', width=10, command=lambda: tello.sweep()).grid(row=1, column=0, padx=90, pady=10)
+    frame0, text='Follow Sweep', width=10, command=lambda: threading.Thread(target=tello.sweep).start()).grid(row=1, column=0, padx=90, pady=10)
 button_take_over = Button(
-    frame0, text='Take Over', width=10, command=lambda: tello.start_manual_control()).grid(row=1, column=1, padx=90, pady=10)
+    frame0, text='Take Over', width=10, command=lambda: threading.Thread(target=tello.start_manual_control).start()).grid(row=1, column=1, padx=90, pady=10)
 button_continue_sweep = Button(
-    frame0, text='Continue sweep', width=10, command=lambda: tello.continue_sweep()).grid(row=1, column=2, padx=90, pady=10)
+    frame0, text='Continue sweep', width=10, command=lambda: threading.Thread(target=tello.continue_sweep).start()).grid(row=1, column=2, padx=90, pady=10)
 
 # buttons to control flying forward, back, left and right
 button_forward = Button(frame1, text='forward', height=1, width=8,

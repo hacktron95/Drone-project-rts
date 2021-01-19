@@ -23,14 +23,22 @@ class Tello:
         self.tello_adderss = (self.tello_ip, self.tello_port)
         self.log = []
 
+        self.isInterruptd = False
         self.MAX_TIME_OUT = 0.1  # fail fast since there's no drone
         self.send_command('command', 0)
+
+    def Interrupt(self):
+        self.isInterruptd = True
+
+    def get_isInterruptd(self):
+        return self.isInterruptd
 
     def sweep(self):
         print("Going autonomus ...")
         sweep.execute(self)
 
     def start_manual_control(self):
+        self.Interrupt()
         # interrupt the sweep, this should be called on a switch
         print("start manual control")
 
@@ -38,7 +46,7 @@ class Tello:
         # continue the sweep
         print("tello continue sweep")
 
-    def send_command(self, command, d):
+    def send_command(self, command, d: int = 1):
         self.log.append(Stats(command, len(self.log)))
 
         self.socket.sendto(command.encode('utf-8'), self.tello_adderss)
